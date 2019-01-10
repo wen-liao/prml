@@ -1,0 +1,224 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{siunitx} 
+\begin{document}
+\title{Assignment 4: BP}
+\author{LIAO,WEN}
+\date{\today}
+\maketitle
+\section{Task Description}
+Please derive a backpropagation process
+\begin{enumerate}
+\item for the multi-layer neural network with one hidden layer, where data are in a d-dimensional feature space with C classes. Loss functions can use L2 distance or cross entropy. 
+\item for the LeNet-5 CNN.
+\item for Vanilla recurrent neural networks with T time steps.
+\end{enumerate}  
+\section{Multilayer Perceptron}
+\subsection{Notations}
+Consider a multilayer perceptron with one hidden layer. We'll use the following notations to describe the archietecture of a feedforward neural network.
+\begin{enumerate}
+\item$N$: dimension of the input layer
+\item$M$: dimension of the hidden layer
+\item$C$: dimension of the output layer
+\item$x_{i}$: the i-th dimension of the input layer 
+\item$z_{k}$: the k-th dimension of the hidden layer
+\item$y_{j}$: the j-th dimension of the output layer
+\end{enumerate}
+\subsection{Loss Function}
+Let $\{(x_{n},y_{n})\}^{N'}_{n=1}$ be the training dataset. For a sample $(x_{n},y_{n})$, the loss function is defined as
+\begin{displaymath}
+L(\hat{y_{n}},y_{n})=-\sum^{N}_{i=1}y_{nj}log(\hat{y}_{nj})
+\end{displaymath}
+The loss function is defined as
+\begin{displaymath}
+L(W^{(1)},b^{(1)},W^{(2)},b^{(2)}) = \sum^{N'}_{n = 1}L(\hat{y}_{n},y_{n})+\frac{\lambda}{2}tr\{W^{(1)T}W^{(1)}+W^{(2)T}W^{2}\}
+\end{displaymath}
+\subsection{Forward Propagation}
+Let $(x,y)$ be a sample. In the forward propagation phase,we calculate the loss function in the following way
+\begin{displaymath}
+z_{k}=f_{1}(\sum^{N}_{i=1}w^{(1)}_{ki}x_{i}+b^{(1)}_{k})
+\end{displaymath}
+\begin{displaymath}
+y_{i}=f_{2}(\sum^{M}_{k=1}w^{(2)}_{jk}z_{k}+b^{(2)}_{k})
+\end{displaymath}
+\begin{displaymath}
+L(\hat{y_{n}},y_{n})=-\sum^{N}_{i=1}y_{nj}log(y_{j})
+\end{displaymath}
+\subsection{Backward Propagation}
+For each iteration, we update the parameters of the model by computing the gradient of the loss function.
+\begin{displaymath}
+w^{(1)}_{ki}\gets{}w^{(1)}_{ki} + \eta{}\frac{\partial{}L}{\partial{}w^{(1)}_{ki}}+\lambda{}w^{(1)}_{ki}
+\end{displaymath}
+\begin{displaymath}
+w^{(2)}_{jk}\gets{}w^{(2)}_{jk} + \eta{}\frac{\partial{}L}{\partial{}w^{(2)}_{jk}}+\lambda{}w^{(2)}_{jk}
+\end{displaymath}
+\begin{displaymath}
+b^{(1)}_{k}\gets{}b^{(1)}_{k} + \eta{}\frac{\partial{}L}{\partial{}b^{(1)}_{k}}
+\end{displaymath}
+\begin{displaymath}
+b^{(2)}_{j}\gets{}b^{(1)}_{j} + \eta{}\frac{\partial{}L}{\partial{}b^{(1)}_{j}}
+\end{displaymath}
+The gradients are calculated on a computational graph in the following way.
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}y_{i}} = \frac{y_{nj}}{y_{j}}
+\end{displaymath}
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}b^{(2)}_{k}} = \sum^{C}_{j=1}\frac{\partial{}L}{\partial{}y_{j}}\frac{\partial{}y_{j}}{\partial{}b^{(2)}_{k}}=\sum^{C}_{j=1}\frac{\partial{}L}{\partial{}y_{j}}f^{'}_{2}(\sum^{M}_{k=1}w^{(2)}_{jk}z_{k}+b^{(2)}_{k})
+\end{displaymath}
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}w^{(2)}_{jk}} = \frac{\partial{}L}{\partial{}y_{j}}\frac{\partial{}y_{j}}{\partial{}w^{(2)}_{jk}}=\frac{\partial{}L}{\partial{}y_{j}}f^{'}_{2}(\sum^{M}_{k=1}w^{(2)}_{jk}z_{k}+b^{(2)}_{k})z_{k}
+\end{displaymath}
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}z_{k}} = \sum^{C}_{j=1}\frac{\partial{}L}{\partial{}y_{j}}\frac{\partial{}y_{j}}{\partial{}z_{k}}=\sum^{C}_{j=1}\frac{\partial{}L}{\partial{}y_{j}}w^{(2)}_{jk}
+\end{displaymath}
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}b^{(1)}_{i}} = \sum^{M}_{k=1}\frac{\partial{}L}{\partial{}z_{k}}\frac{\partial{}z_{k}}{\partial{}b^{(1)}_{i}}=\sum^{M}_{k=1}\frac{\partial{}L}{\partial{}z_{k}}f^{'}_{1}(\sum^{N}_{i=1}w^{(1)}_{ki}x_{i}+b^{(1)}_{i})
+\end{displaymath}
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}w^{(1)}_{ki}} = \frac{\partial{}L}{\partial{}z_{k}}\frac{\partial{}z_{k}}{\partial{}w^{(1)}_{ki}}=\frac{\partial{}L}{\partial{}z_{k}}f^{'}_{1}(\sum^{N}_{i=1}w^{(1)}_{ki}x_{i}+b^{(1)}_{i})x_{i}
+\end{displaymath}
+\section{LeNet-5 CNN}
+\subsection{Archietecture of LeNet-5 RNN}
+Figure \ref{LeNet-5} shows the archietecure of LeNet-5 CNN.The are two convolutional layers (CONV), two pooling layers (POOL) and three fully connected layers (FC).
+\begin{figure}[htbp]
+\centering
+\includegraphics[height=4.0cm]{LeNet-5.png}
+\caption{Archietecture of LeNet-5}
+\label{LeNet-5}
+\end{figure}
+\subsection{Notations}
+The way of computing the gradients in fully connected layer is actually similar to the way we compute that in a multilayer perceptron. Therefore, we mainly focus on the CONV and POOL layers. Here are notations for further discussion.
+\begin{enumerate}
+\item $\tilde{X}^{(l)}\in{}\mathbb{R}^{N^{(l)}\times{}M^{(l)}\times{}D^{(l)}}$: the output of the $l$-th CONV block before the activation function
+\item $X^{(l)}\in{}\mathbb{R}^{N^{(l)}\times{}M^{(l)}\times{}D^{(l)}}$: the output of the $l$-th CONV block. This means the input layer when $l=0$
+\item $\tilde{Y}^{(l)}\in{}\mathbb{R}^{N^{'(l)}\times{}M^{'(l)}\times{}D^{(l)}}$: the $l$-th CONV layer before the activation function
+\item $Y^{(l)}\in{}\mathbb{R}^{N^{'(l)}\times{}M^{'(l)}\times{}D^{(l)}}$: the $l$-th CONV layer
+\item $T^{(l)}\in{}\mathbb{R}^{D^{(l-1)}\times{}D^{(l)}}$: the link table of the $l$-th layer
+\item $W^{(l)}\in{}\mathbb{R}^{n^{(l)}\times{}m^{(l)}\times{}D^{(l-1)}\times{}D^{(l)}}$: the filter of the $l$-th CONV layer
+\item $b^{(l)}\in{}\mathbb{R}^{D^{(l)}}$: the bias of the $l$-th CONV layer
+\item $w^{(l)}\in{}\mathbb{R}^{D^{(l)}}$: the weight of the $l$-th pooling layer
+\item $a^{(l)}\in{}\mathbb{R}^{D^{(l)}}$: the bias of the $l$-th pooling layer
+\item $f_{l}$: the activation function of the $i$-th CONV layer
+\item $g_{l}$: the pooling function of the $i$-th pooling layer,
+\end{enumerate}
+\subsection{Forward Propagation}
+In the forward propagation phase, the CONV layers are computed in the following way
+\begin{displaymath}
+\tilde{Y}^{(l,d)} = \sum_{p,T^{(l)}_{p,d}=1}W^{(l,p,d)}\otimes{}X^{(l-1,p)}+b^{(l,d)}
+\end{displaymath}
+\begin{displaymath}
+Y^{(l,d)} = f_{l}(\tilde{Y}^{(l,d)})
+\end{displaymath}
+where $\otimes{}$ refers to the convolution operation. The POOL layers are calculated as follows
+\begin{displaymath}
+\tilde{X}^{(l,d)} = \omega^{(l,d)}MeanPool(Y^{(l,p)})+a^{(l,d)}
+\end{displaymath}
+\begin{displaymath}
+X^{(l,d)} = g_{l}(\tilde{X}^{(l,d)})
+\end{displaymath}
+\subsection{Backward Propagation}
+\begin{enumerate}
+\item{} The way to calculate $\frac{\partial{}L}{\partial{}X^{(2)}}$ and the gradients of parameters in the FC layers is similar to what we have done with a multilayer perceptron, and thus requires more ink than is available for a detailed discussion.
+\item Given $\frac{\partial{}L}{\partial{}X^{(l)}}$, $\frac{\partial{}L}{\partial{}\omega^{(l)}}$ can be computed in the following way.
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}\omega^{(l,d)}}=sum(\frac{\partial{}L}{\partial{}X^{(l,d)}}\odot{}g^{'}_{l}(\tilde{X}^{(l,d)})\odot{}MeanPool(Y^{(l,p)}))
+\end{displaymath}
+where $sum$ refers to the sum of all elements of a matrix and $\odot$ means elementwise product of two matrices.
+$\frac{\partial{}L}{\partial{}a^{(l,d)}}$ can be computed in the following way.
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}a^{(l,d)}}=sum(\frac{\partial{}L}{\partial{}X^{(l,d)}}\odot{}g^{'}_{l}(\tilde{X}^{(l,d)}))
+\end{displaymath}
+
+$\frac{\partial{}L}{\partial{}Y^{(l)}}$ can be computed in the following way.
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}Y^{(l,d)}_{i,j}}=\frac{\omega^{(l,d)}}{4}(\frac{\partial{}L}{\partial{}X^{(l,d)}}\odot{}g^{'}_{l}(\tilde{X}^{(l,d)}))_{[\frac{i+1}{2}],[\frac{j+1}{2}]}
+\end{displaymath}
+
+\item{}Given $\frac{\partial{}L}{\partial{}Y^{(l)}}$,$\frac{\partial{}L}{\partial{}\tilde{Y}^{(l)}}$ can be computed in the following way.
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}\tilde{X}^{(l)}} = \frac{\partial{}L}{\partial{}Y^{(l)}}\odot{}f^{'}_{l}(\tilde{X}^{(l)})
+\end{displaymath}
+From that we can compute the following gradients
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}W^{(l,p,d)}}=\frac{\partial{}L}{\partial{}\tilde{X}^{(l,d)}}\otimes{}X^{(l-1,p)}
+\end{displaymath}
+for $T^{(l)}_{p,d} = 1$.
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}b^{(l,d)}} = sum(\frac{\partial{}L}{\partial{}\tilde{X}^{(l,d)}})
+\end{displaymath}
+\begin{displaymath}
+\frac{\partial{}L}{\partial{}X^{(l-1,d)}}= \sum_{p,T^{(l)}_{p,d}=1}rot180(W^{(l,p,d)})\tilde{\otimes{}}\frac{\partial{}L}{\partial{}\tilde{X}^{(l,d)}}
+\end{displaymath}
+where $rot180$ means the operation of rotating a matrix by $\ang{180}$ and $\tilde{\otimes{}}$ means the wide convolution operation.
+\end{enumerate}
+\section{Vanilla RNN}
+\subsection{Notations}
+Let's define some notations for the following discussion.
+\begin{enumerate}
+\item $x_{t} \in \mathbb{R}^{N}$: the input layer at time $t$
+\item $h_{t} \in \mathbb{R}^{M}$: the hidden layer at time $t$
+\item $y_{t} \in \mathbb{R}^{C}$: the output layer at time $t$
+\item $f$: activation function at the hidden layer, usually a sigmoid or hyperbolic tangent function
+\item $g$: mapping function at the ouput layer
+\end{enumerate}
+\subsection{Loss Function}
+Let's consider a synchronous seq2seq model. Suppose $(x_{1:T},y_{1:T})$ is a sample, and $\hat{y}_{1:T}$ is the output at time $t$. The loss function at time $t$ is defined as
+\begin{displaymath}
+L_{t} = L(y_{t},\hat{y}_{t})
+\end{displaymath}
+which is usually a cross entropy loss. The overall loss function is then defined as
+\begin{displaymath}
+L = \sum^{T}_{t = 1} L_{t}
+\end{displaymath}
+\subsection{Forward Propagation}
+The output layer can be computed in the following way
+\begin{displaymath}
+z_{t} = Uh_{t-1} + Wx_{t} + b
+\end{displaymath}
+\begin{displaymath}
+h_{t} = f(z_{t})
+\end{displaymath}
+\begin{displaymath}
+y_{t} = g(h_{t})
+\end{displaymath}
+where $U \in \mathbb{R}^{M \times M}$, $W \in \mathbb{R}^{N \times M}$, $b \in \mathbb{R}^{M}$ are parameters of the model.
+\subsection{Backward Propagation: Backpropagation Through time (BPTT)}
+Let's take $\frac{\partial L}{\partial U}$ as the example.
+\begin{displaymath}
+\frac{\partial L}{\partial U} = \sum^{T}_{t=1}\frac{\partial L_{t}}{\partial U}
+\end{displaymath}
+$\frac{\partial L_{t}}{\partial U}$ can be computed in the following way
+\begin{displaymath}
+\frac{\partial L_{t}}{\partial U_{ij}} = \sum^{t}_{k = 1}\frac{\partial^{+} z_{k}}{\partial U_{ij}}\frac{\partial L_{t}}{\partial z_{k}}
+\end{displaymath}
+$\delta_{t,k}$ is defined as follows
+\begin{displaymath}
+\delta_{t,k} = \frac{\partial L_{t}}{\partial z_{k}}
+\end{displaymath}
+which can be computed via the recurrent formula
+\begin{align*}
+\delta_{t,k} &= \frac{\partial h_{k}}{\partial z_{k}} \frac{\partial z_{k+1}}{\partial h_{k}} \frac{\partial L_{t}}{\partial z_{k+1}}\\
+&=diag(f^{'}(z_{k}))U^{T}\delta_{t,k+1}
+\end{align*}
+And $\frac{\partial^{+} z_{k}}{\partial U_{ij}}$ can be calculated as
+\begin{displaymath}
+(\frac{\partial^{+} z_{k}}{\partial U_{ij}})_{p} = [h_{k-1}]_{j} I(i=p)
+\end{displaymath}
+Combine these formulas we get the gradient
+\begin{displaymath}
+\frac{\partial L}{\partial U} = \sum^{T}_{t=1} \sum^{t}_{k=1} \delta_{t,k} h^{T}_{k-1}
+\end{displaymath}
+Other gradients can be calculated in very similar ways. Here are the results.
+\begin{displaymath}
+\frac{\partial L}{\partial W} = \sum^{T}_{t=1} \sum^{t}_{k=1} \delta_{t,k} x^{T}_{k}
+\end{displaymath}
+\begin{displaymath}
+\frac{\partial L}{\partial U} = \sum^{T}_{t=1} \sum^{t}_{k=1} \delta_{t,k}
+\end{displaymath}
+\section{References}
+\begin{enumerate}
+\item https://nndl.github.io
+\end{enumerate}
+\end{document}
